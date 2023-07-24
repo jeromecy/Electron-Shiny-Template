@@ -4,7 +4,7 @@
 pdf("reg-tests-2.pdf", encoding = "ISOLatin1.enc")
 
 ## force standard handling for data frames
-options(stringsAsFactors=TRUE)
+options(stringsAsFactors=FALSE) # R >= 4.0.0
 options(useFancyQuotes=FALSE)
 
 ### moved from various .Rd files
@@ -62,7 +62,8 @@ summary(bI <- besselI(x = x <- 10:700, 1))
 ## data.frame
 set.seed(123)
 L3 <- LETTERS[1:3]
-d <- data.frame(cbind(x=1, y=1:10), fac = sample(L3, 10, replace=TRUE))
+d <- data.frame(cbind(x=1, y=1:10), fac = sample(L3, 10, replace=TRUE),
+                stringsAsFactors=TRUE)
 str(d)
 (d0  <- d[, FALSE]) # NULL dataframe with 10 rows
 (d.0 <- d[FALSE, ]) # <0 rows> dataframe  (3 cols)
@@ -174,7 +175,7 @@ kronecker(fred, bill, make=TRUE)
 authors <- data.frame(
     surname = c("Tukey", "Venables", "Tierney", "Ripley", "McNeil"),
     nationality = c("US", "Australia", "US", "UK", "Australia"),
-    deceased = c("yes", rep("no", 4)))
+    deceased = c("yes", rep("no", 4)), stringsAsFactors=TRUE)
 books <- data.frame(
     name = c("Tukey", "Venables", "Tierney",
              "Ripley", "Ripley", "McNeil", "R Core"),
@@ -185,7 +186,8 @@ books <- data.frame(
               "Interactive Data Analysis",
               "An Introduction to R"),
     other.author = c(NA, "Ripley", NA, NA, NA, NA,
-                     "Venables & Smith"))
+		     "Venables & Smith"),
+	   stringsAsFactors=TRUE)
 b2 <- books; names(b2)[1] <- names(authors)[1]
 
 merge(authors, b2, all.x = TRUE)
@@ -223,9 +225,12 @@ tabulate(numeric(0))
 ## end of moved from tabulate.Rd
 
 ## ts
-# Ensure working arithmetic for `ts' objects :
+# Ensure working arithmetic for 'ts' objects :
+z <- ts(matrix(1:300, 100, 3), start = c(1961, 1), frequency = 12)
 stopifnot(z == z)
 stopifnot(z-z == 0)
+if(FALSE) ## <<-- not currently: _R_CHECK_MATRIX_DATA_ \\ related to earlier code:
+tools::assertWarning(matrix(1:90, 10, 3), verbose=TRUE)
 
 ts(1:5, start=2, end=4) # truncate
 ts(1:5, start=3, end=17)# repeat
@@ -307,15 +312,15 @@ summary(data.frame(x))
 
 ## Chong Gu 2001-Feb-16.  step on binomials
 detg1 <-
-structure(list(Temp = structure(c(2L, 1L, 2L, 1L, 2L, 1L, 2L,
-    1L, 2L, 1L, 2L, 1L), .Label = c("High", "Low"), class = "factor"),
-    M.user = structure(c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 1L,
-    1L, 2L, 2L), .Label = c("N", "Y"), class = "factor"),
-    Soft = structure(c(1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L),
-    .Label = c("Hard", "Medium", "Soft"), class = "factor"),
+structure(list(Temp = factor(c(2L, 1L, 2L, 1L, 2L, 1L, 2L,
+    1L, 2L, 1L, 2L, 1L), labels = c("High", "Low")),
+    M.user = factor(c(1L, 1L, 2L, 2L, 1L, 1L, 2L, 2L, 1L,
+    1L, 2L, 2L), labels = c("N", "Y")),
+    Soft = factor(c(1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L),
+    labels = c("Hard", "Medium", "Soft")),
     M = c(42, 30, 52, 43,
     50, 23, 55, 47, 53, 27, 49, 29), X = c(68, 42, 37, 24, 66,
-    33, 47, 23, 63, 29, 57, 19)), .Names = c("Temp", "M.user",
+    33, 47, 23, 63, 29, 57, 19)), names = c("Temp", "M.user",
 "Soft", "M", "X"), class = "data.frame", row.names = c("1", "3",
 "5", "7", "9", "11", "13", "15", "17", "19", "21", "23"))
 detg1.m0 <- glm(cbind(X,M)~1,binomial,detg1)
@@ -362,10 +367,11 @@ gofX.df<-
     0.999573603041505, 0.67546318055115, -0.756802495307928,
     -0.0583741434275801, -0.756802495307928, 0.999573603041505,
     -0.756802495307928, 0.67546318055115, -0.0583741434275801
-    ), groups = structure(c(1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2,
-    2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3), class = "factor", .Label = c("1",
-    "2", "3"))), .Names = c("A", "B", "C", "D", "groups"), row.names = 1:24,
-            class = "data.frame")
+    ), groups = factor(c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L,
+                         2L, 2L, 2L, 2L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L),
+                       labels = c("1", "2", "3"))),
+names = c("A", "B", "C", "D", "groups"), row.names = 1:24,
+class = "data.frame")
 
 gofX.manova <- manova(formula = cbind(A, B, C, D) ~ groups, data = gofX.df)
 try(summary(gofX.manova))
@@ -482,7 +488,7 @@ rowsum(matrix(1:12, 3,4), c("Y","X","Y"))
 ## PR#1115 (saving strings with ascii=TRUE)
 x <- y <- unlist(as.list(
     parse(text=paste("\"\\", as.character(as.octmode(1:255)), "\"",sep=""))))
-save(x, ascii=TRUE, file=(fn <- tempfile()))
+save(x, ascii=TRUE, file=(fn <- tempfile(tmpdir = getwd())))
 load(fn)
 all(x==y)
 unlink(fn)
@@ -829,7 +835,7 @@ par(mfrow = c(1,1))
                    x4 = c(60, 52, 20, 47, 33, 22, 6, 44, 22, 26, 34, 12, 12),
                    y = c(78.5, 74.3, 104.3, 87.6, 95.9, 109.2, 102.7, 72.5,
                    93.1, 115.9, 83.8, 113.3, 109.4)),
-              .Names = c("x1", "x2", "x3", "x4", "y"), class = "data.frame",
+              names = c("x1", "x2", "x3", "x4", "y"), class = "data.frame",
               row.names = 1:13)
 teststep <- function(formula, data)
 {
@@ -913,7 +919,7 @@ aa[["row.names"]] <- A
 aa
 ## wrong printed names in 1.7.1
 
-## assigning to NULL
+## assigning to NULL --- now consistently behaves as if assigning to list() !
 a <- NULL
 a[["a"]] <- 1
 a
@@ -970,7 +976,9 @@ dat[3, 1] <- dat[4, 2] <- NA
 lm.influence(lm(y ~ x1 + x2, data=dat, weights=wt, na.action=na.omit))
 lm.influence(lm(y ~ x1 + x2, data=dat, weights=wt, na.action=na.exclude))
 lm.influence(lm(y ~ 0, data=dat, weights=wt, na.action=na.omit))
+print(width = 99,
 lm.influence(lm(y ~ 0, data=dat, weights=wt, na.action=na.exclude))
+) ; stopifnot(getOption("width") == 80)
 lm.influence(lm(y ~ 0 + x3, data=dat, weights=wt, na.action=na.omit))
 lm.influence(lm(y ~ 0 + x3, data=dat, weights=wt, na.action=na.exclude))
 lm.influence(lm(y ~ 0, data=dat, na.action=na.exclude))
@@ -1317,13 +1325,15 @@ Mat <- matrix(c(1:3, letters[1:3], 1:3, LETTERS[1:3],
                 c("2004-01-01", "2004-02-01", "2004-03-01"),
                 c("2004-01-01 12:00", "2004-02-01 12:00", "2004-03-01 12:00")),
               3, 6)
-foo <- tempfile()
+foo <- tempfile(tmpdir = getwd())
 write.table(Mat, foo, col.names = FALSE, row.names = FALSE)
-read.table(foo, colClasses = c(NA, NA, "NULL", "character", "Date", "POSIXct"))
+read.table(foo, colClasses = c(NA, NA, "NULL", "character", "Date", "POSIXct"),
+           stringsAsFactors=TRUE)
 unlist(sapply(.Last.value, class))
-read.table(foo, colClasses = c("factor",NA,"NULL","factor","Date","POSIXct"))
+read.table(foo, colClasses = c("factor",NA,"NULL","factor","Date","POSIXct"),
+           stringsAsFactors=TRUE)
 unlist(sapply(.Last.value, class))
-read.table(foo, colClasses = c(V4="character"))
+read.table(foo, colClasses = c(V4="character"), stringsAsFactors=TRUE)
 unlist(sapply(.Last.value, class))
 unlink(foo)
 ## added in 2.0.0
@@ -1459,7 +1469,7 @@ stopifnot(inherits(res, "try-error"))
 
 
 ## (PR#7789) escaped quotes in the first five lines for read.table
-tf <- tempfile()
+tf <- tempfile(tmpdir = getwd())
 x <- c("6 'TV2  Shortland Street'",
        "2 'I don\\\'t watch TV at 7'",
        "1 'I\\\'m not bothered, whatever that looks good'",
@@ -1605,10 +1615,10 @@ m21[which(m21 == 0, arr.ind = TRUE)]
 ## tests of indexing as quoted in Extract.Rd
 x <- NULL
 x$foo <- 2
-x # length-1 vector
+x # now, a list
 x <- NULL
 x[[2]] <- pi
-x # numeric vector
+x # now, a list, too
 x <- NULL
 x[[1]] <- 1:3
 x # list
@@ -1740,7 +1750,7 @@ f <- function(...) browser()
 do.call(f, mtcars)
 c
 
-options(error = expression(NULL))
+op <- c(op, options(error = expression(NULL)))
 f <- function(...) stop()
 do.call(f, mtcars)
 traceback()
@@ -1880,10 +1890,11 @@ d.AD <- data.frame(treatment = gl(3,3), outcome = gl(3,1,9),
                    counts = c(18,17,15,20,10,20,25,13,12))
 fit <- glm(counts ~ outcome + treatment, family = poisson,
            data = d.AD, weights = c(0, rep(1,8)))
-residuals(fit, type="working") # first was NA < 2.4.0
+print(residuals(fit, type="working"),
+      width = 37) # first was NA < 2.4.0 //  using new 'width'
 ## working residuals were NA for zero-weight cases.
 fit2 <- glm(counts ~ outcome + treatment, family = poisson,
-           data = d.AD, weights = c(0, rep(1,8)), y = FALSE)
+            data = d.AD, weights = c(0, rep(1,8)), y = FALSE)
 for(z in c("response", "working", "deviance", "pearson"))
     stopifnot(all.equal(residuals(fit, type=z), residuals(fit2, type=z),
                         scale = 1, tolerance = 1e-10))
@@ -2008,7 +2019,7 @@ dput(x, control="keepNA")
 dput(x)
 dput(x, control="all")
 dput(x, control=c("all", "S_compatible"))
-tmp <- tempfile()
+tmp <- tempfile(tmpdir = getwd())
 dput(x, tmp, control="all")
 stopifnot(identical(dget(tmp), x))
 dput(x, tmp, control=c("all", "S_compatible"))
@@ -2068,6 +2079,9 @@ dput(d0)
 dput(d1)
 identical(d0, d1)
 all.equal(d0, d1)
+## change to identical(,attrib.as.set) code to support internal representation in 4.2.0
+identical(d0, d1, attrib.as.set = FALSE)
+##
 row.names(d1) <- as.character(1:4)
 dput(d1)
 identical(d0, d1)
@@ -2222,7 +2236,7 @@ qr.coef(qr(matrix(0:1, 1, dimnames=list(NULL, c("zero","one")))), 5)
 ## readChar read extra items, terminated on zeros
 x <- as.raw(65:74)
 readChar(x, nchar=c(3,3,0,3,3,3))
-f <- tempfile()
+f <- tempfile(tmpdir = getwd())
 writeChar("ABCDEFGHIJ", con=f, eos=NULL)
 readChar(f, nchar=c(3,3,0,3,3,3))
 unlink(f)
@@ -2614,8 +2628,9 @@ is.unsorted(data.frame(x=3:4, y=1:2))
 
 library("methods")# (not needed here)
 assertError <- tools::assertError
-assertError( getMethod(ls, "bar", fdef=ls), verbose=TRUE)
-assertError( getMethod(show, "bar"), verbose=TRUE)
+assertErrorV <- function(expr) assertError(expr, verbose=TRUE)
+assertErrorV( getMethod(ls, "bar", fdef=ls) )
+assertErrorV( getMethod(show, "bar") )
 ## R < 2.15.1 gave
 ##   cannot coerce type 'closure' to vector of type 'character'
 
@@ -2693,7 +2708,8 @@ substitute(f(x), list(f = quote(g(y))))
 
 
 ## PR#15247 : str() on invalid data frame names (where print() works):
-d <- data.frame(1:3, "B", 4); names(d) <- c("A", "B\xba","C\xabcd")
+d <- data.frame(1:3, "B", 4, stringsAsFactors=TRUE)
+names(d) <- c("A", "B\xba","C\xabcd")
 str(d)
 ## gave an error in R <= 3.0.0
 
@@ -2756,12 +2772,15 @@ all.equal(x, y, check.names = FALSE)
 ## failed on mismatched attributes
 
 
-## PR#15411, plus digits change
+## PR#15411; PR#18098 ==> digits=0 not ok:
 format(9992, digits = 3)
 format(9996, digits = 3)
-format(0.0002, digits = 0, nsmall = 2)
-format(pi*10, digits = 0, nsmall = 1)
-## second added an extra space; 3rd and 4th were not allowed.
+format(0.0002, digits = 1, nsmall = 2, scientific = FALSE)
+assertErrorV(
+format(pi*10,  digits = 0))
+format(pi*10,  digits = 1)
+format(pi*10,  digits = 1, nsmall = 1)
+## second added an extra space.
 
 ## and one branch of this was wrong:
 xx <- c(-86870268, 107833358, 302536985, 481015309, 675718935, 854197259,
@@ -2799,12 +2818,12 @@ str(max(NA_character_, "bla"))
 
 ## When two entries needed to be cut to width, str() mixed up
 ## the values (reported by Gerrit Eichner)
-oldopts <- options(width=70, stringsAsFactors=TRUE)
+oldopts <- options(width=70)
 n <- 11      # number of rows of data frame
 M <- 10000   # order of magnitude of numerical values
 longer.char.string <- "zjtvorkmoydsepnxkabmeondrjaanutjmfxlgzmrbjp"
 X <- data.frame( A = 1:n * M,
-                 B = rep( longer.char.string, n))
+                 B = factor(rep(longer.char.string, n)))
 str( X, strict.width = "cut")
 options(oldopts)
 ## The first row of the str() result was duplicated.
@@ -2828,7 +2847,16 @@ read.csv(f, skipNul = TRUE, fileEncoding = "UTF-8-BOM")
 ## all.equal datetime method
 x <- Sys.time()
 all.equal(x,x)
-all.equal(x, as.POSIXlt(x))
+
+# FIXME: check.tzone = FALSE needed because since 79037, all.equal.POSIXt
+# strictly reports "" and the current time zone (even from TZ environment
+# variable) as different.  The conversion round-trip from Sys.time()
+# (POSIXct) via POSIXlt and back to POSIXct creates an object with the
+# current time zone, yet the original is with "" as time zone (and both
+# refer to the same time zone).
+all.equal(x, as.POSIXlt(x), check.tzone = FALSE)
+
+all.equal(x, as.numeric(x))  # errored in R <= 4.0.2
 all.equal(x, as.POSIXlt(x, tz = "EST5EDT"))
 all.equal(x, x+1e-4)
 isTRUE(all.equal(x, x+0.002)) # message will depend on representation error
@@ -3013,6 +3041,9 @@ quote(!!x) # was `!(!x)`
 quote(??x) # Suboptimal
 quote(~+-!?x) # ditto: ....`?`(x)
 ## `!` no longer produces parentheses now
+##
+## There should be no parentheses (always worked)
+quote(+!x)
 
 
 ## summary.data.frame() with NAs in columns of class "Date" -- PR#16709
@@ -3066,11 +3097,11 @@ sprintf("%d", c(1,NA))
 sprintf("%d", c(NA,1))
 ##
 ## these should fail
-sprintf("%d", 1.1)
-sprintf("%d", c(1.1,1))
-sprintf("%d", c(1,1.1))
-sprintf("%d", NaN)
-sprintf("%d", c(1,NaN))
+assertErrorV( sprintf("%d", 1.1) )
+assertErrorV( sprintf("%d", c(1.1,1)) )
+assertErrorV( sprintf("%d", c(1,1.1)) )
+assertErrorV( sprintf("%d", NaN) )
+assertErrorV( sprintf("%d", c(1,NaN)) )
 
 
 ## formatting of named raws:
@@ -3113,8 +3144,8 @@ stopifnot(exprs = {
 stopifnot(exprs = 2 == 2)
 try(stopifnot(exprs = 1 > 2))
 ## passing an expression object:
-stopifnot(exprs = expression(2 == 2, pi < 4))
-tryCatch(stopifnot(exprs = expression(
+stopifnot(exprObject = expression(2 == 2, pi < 4))
+tryCatch(stopifnot(exprObject = expression(
                        2 == 2,
                        { cat("\n Kilroy again .."); TRUE },
                        pi < 4,
@@ -3128,3 +3159,128 @@ cat("Error: ", M3, "\n")
 ## print.htest() with small 'digits'
 print(t.test(1:28), digits = 3)
 ## showed 'df = 30' from signif(*, digits=1) and too many digits for CI, in R <= 3.5.1
+
+
+## str(<d.frame w/ attrib>):
+treeA <- trees
+attr(treeA, "someA") <- 1:77
+str(treeA)
+## now shows the *length* of "someA"
+
+
+## summaryRprof() bug PR#15886  + "Rprof() not enabled" PR#17836
+if(capabilities("Rprof")) {
+    Rprof(tf <- tempfile("Rprof.out", tmpdir = getwd()), memory.profiling=TRUE, line.profiling=FALSE)
+    out <- lapply(1:10000, rnorm, n= 512)
+    Rprof(NULL)
+    if(interactive())
+        print(length(readLines(tf))) # ca. 10 .. 20 lines
+    op <- options(warn = 2) # no warnings, even !
+    for (cs in 1:21) s <- summaryRprof(tf, memory="tseries", chunksize=cs)
+    ## "always" triggered an error (or a warning) in R <= 3.6.3
+    options(op)
+    unlink(tf)
+}
+
+
+## printing *named* complex vectors (*not* arrays), PR#17868 (and PR#18019):
+a <- 1:12; (z <- a + a*1i); names(z) <- letters[seq_along(z)]; z
+## fixed in R-devel in July 2020;  R 4.0.3 patched on Dec 26, 2020
+
+
+## identical(*) on "..." object
+(ddd <- (function(...) environment())(1)$...) # <...>
+ dd2 <- (function(...) environment())(1)$...
+stopifnot( identical(ddd, dd2) )
+## In R <= 4.0.3,  printed to console (no warning, no message!):
+## "Unknown Type: ... (11)"
+
+
+## printCoefmat() should keep NaN values (PR#17336)
+##cm <- summary(lm(c(0,0,0) ~ 1))$coefficients
+cm <- cbind(Estimate = 0, SE = 0, t = NaN, "Pr(>|t|)" = NaN)
+printCoefmat(cm)  # NaN's were replaced by NA in R < 4.1.0
+
+
+## deparse() wraps cflow bodies when deeply burried through a LHS (PR#18232)
+##
+## These didn't print the same before fix, the bquote() expression
+## missed parentheses
+ quote(1 +        (if (TRUE) 2)  + 3)
+bquote(1 + .(quote(if (TRUE) 2)) + 3)
+bquote(2 * .(quote(if (TRUE) 2 else 3)) / 4)
+## From Suharto. Failed `left` state wasn't properly forwarded across operators
+bquote(1 + ++.(quote(if (TRUE) 2)) + 3)
+bquote(1^- .  (quote(if (TRUE) 2)) + 3)
+## (found when fiddling w/ cases below):
+quote(`-`(1 + if(L) 2, 3+4))# wrongly was  1 + if (L) 2 - (3 + 4)
+##
+##__ All the following were ok in R <= 4.1.x already __
+bquote(1 + .(quote(if (TRUE) 2)) ^ 3) # already correct previously
+## other constructs cancel the LHS state ==> `if` call isn't wrapped:
+bquote(1 + .(quote(   f(if (TRUE) 2))) + 3)
+bquote(1 + .(quote((2 + if (TRUE) 3))) + 4)
+## cflow bodies are only wrapped if needed ==> no parentheses here :
+quote(a <- if (TRUE) 1)
+## print the same
+quote(`^`(-1, 2))
+quote((-1)^2)
+## no parentheses:
+quote(1^-2)
+quote(1^-2 + 3)
+## The "formula" case of Adrian Dusa (maintainer of QCA); R-devel ML, Nov.15, 2021
+quote(A + ~B + C ~ D) # no parens
+## 'simple' binary op
+quote(a$"b")
+## When cflow body is burried deeply through the right, don't rewrap
+## unnecessarily. There should be only one set of parentheses.
+## Cases where R-devel 81211 still gave unneeded parens:
+quote(`^`(1 + if(L) 2, 3))
+quote(`*`(1 - if(L) 2 else 22, 3))
+quote(`^`(1 + repeat 2, 3))
+quote(`*`(1 + repeat 2, 3))
+quote(`=`(1 + repeat 2, 3))# *no* parens in R <= 4.1.x
+quote(`=`(1 + `+`(2, repeat 3), 4))
+quote(`+`(`<-`(1, `=`(2, repeat 3)), 4)) # (1 <- (2 = ..
+quote(`+`(`:`(1, `=`(2, repeat 3)), 4))
+## No parentheses when the cflow form is trailing
+quote(1 + +repeat 2)
+quote(`<-`(1, +repeat 2))
+quote(1^+repeat 2)
+quote(`$`(1, +repeat 2))
+## More cases where parens are needed
+quote(`^`(`+`(repeat 1, 2), 3))
+quote(`+`(`+`(repeat 1, 2), 3))
+quote(`+`(`+`(`+`(repeat 1, repeat 2), repeat 3), 4))
+##__ end { all fine in older R }
+
+## Unary operators are parenthesised if needed; print the same:
+quote((-a)$b)
+quote(`$`(-a, b))    # no parens in R <= 4.1.x
+## Binary operators are parenthesised on the LHS of `$`. ; the same:
+quote((1 + 1)$b)
+quote(`$`(1 + 1, b)) # no parens in R <= 4.1.x
+##
+## Unparseable expressions are deparsed in prefixed form
+quote(`$`(1))       # was 1$NULL  in R <= 4.1.x
+quote(`$`(1, 2, 3)) # was 1$2
+quote(`$`(1, NA_character_)) # was 1$NA_char..
+quote(`$`(1, if(L) 2))   # was 1$if (L) 2
+quote(`$`(`$`(1, if(L) 2), 3))
+## No parens because prefix form
+quote(`$`(1 + repeat 2, 3))
+quote(`=`(`$`(1, `$`(2, repeat 3)), 4))
+## these were really bad in  R <= 4.1.x
+
+
+## Deparsing of !  -- PR#18284
+## no parens in 3.5.0 <= R <= 4.1.x:
+quote(1 +  `!`(2) + 3) -> x; x
+quote(1 + +`!`(2) + 3)
+quote(1 + `!`(!2) + 3)
+quote(1 + `!`(if(L) 2) + 3)
+## ok in 3.5.0 <= R <= 4.1.x:
+quote(`&`(a < !b, d))
+## deparse--parse roundtrip is stable (basically)
+stopifnot(eval(x) == 4, eval(parse(text = deparse(x))) == 4)
+## eval()ed to 1 since R 3.5.0 {also because of the weak precedence of `!`}
