@@ -37,3 +37,9 @@ Bundle your desktop App
 ```bash
 npm run package-win
 ```
+
+# Debug
+
+Try `npm start` to check if the App runs properly. If the error is about packages, go to [R-Portable-Win\bin] folder and run `R.ext` as administrator. Update packages or re-install the required packages.
+
+If the screen is blank, click "View" and "Force Reload". 
