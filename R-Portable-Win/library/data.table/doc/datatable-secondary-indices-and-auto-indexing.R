@@ -1,4 +1,4 @@
-## ---- echo = FALSE, message = FALSE--------------------------------------
+## ---- echo = FALSE, message = FALSE---------------------------------------------------------------
 require(data.table)
 knitr::opts_chunk$set(
   comment = "#",
@@ -45,7 +45,7 @@ indices(flights)
 flights["JFK", on = "origin"]
 
 ## alternatively
-# flights[.("JFK"), on = "origin"] (or) 
+# flights[.("JFK"), on = "origin"] (or)
 # flights[list("JFK"), on = "origin"]
 
 ## -------------------------------------------------------------------------------------------------

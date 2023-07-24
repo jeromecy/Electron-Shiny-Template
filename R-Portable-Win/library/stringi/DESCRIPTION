@@ -1,37 +1,37 @@
 Package: stringi
-Version: 1.4.3
-Date: 2019-03-12
-Title: Character String Processing Facilities
-Description: Fast, correct, consistent, portable,
-    as well as convenient character string/text processing in every locale
-    and any native encoding. Owing to the use of the 'ICU'
-    (International Components for Unicode) library,
-    the package provides 'R' users with platform-independent functions
-    known to 'Java', 'Perl', 'Python', 'PHP', and 'Ruby' programmers. Available
-    features include: pattern searching (e.g., with 'Java'-like regular
+Version: 1.7.12
+Date: 2023-01-09
+Title: Fast and Portable Character String Processing Facilities
+Description: A collection of character string/text/natural language
+    processing tools for pattern searching (e.g., with 'Java'-like regular
     expressions or the 'Unicode' collation algorithm), random string generation,
-    case mapping, string transliteration, concatenation,
-    Unicode normalization, date-time formatting and parsing, and many more.
-URL: http://www.gagolewski.com/software/stringi/
-        http://site.icu-project.org/ http://www.unicode.org/
-BugReports: http://github.com/gagolews/stringi/issues
-SystemRequirements: ICU4C (>= 52, optional)
+    case mapping, string transliteration, concatenation, sorting, padding,
+    wrapping, Unicode normalisation, date-time formatting and parsing,
+    and many more. They are fast, consistent, convenient, and -
+    thanks to 'ICU' (International Components for Unicode) -
+    portable across all locales and platforms. Documentation about 'stringi' is
+    provided via its website at <https://stringi.gagolewski.com/> and
+    the paper by Gagolewski (2022, <doi:10.18637/jss.v103.i02>).
+URL: https://stringi.gagolewski.com/,
+        https://github.com/gagolews/stringi, https://icu.unicode.org/
+BugReports: https://github.com/gagolews/stringi/issues
+SystemRequirements: C++11, ICU4C (>= 55, optional)
 Type: Package
-Depends: R (>= 2.14)
+Depends: R (>= 3.1)
 Imports: tools, utils, stats
 Biarch: TRUE
 License: file LICENSE
-Author: Marek Gagolewski [aut, cre] (<https://orcid.org/0000-0003-0637-6028>),
-    Bartek Tartanus [ctb],
-    and other contributors (stringi source code);
-    IBM, Unicode, Inc., and other contributors (ICU4C source code);
-    Unicode, Inc. (Unicode Character Database)
+Author: Marek Gagolewski [aut, cre, cph] (<https://orcid.org/0000-0003-0637-6028>),
+    Bartek Tartanus [ctb], and others (stringi source code);
+    Unicode, Inc. and others (ICU4C source code, Unicode Character Database)
 Maintainer: Marek Gagolewski <marek@gagolewski.com>
-RoxygenNote: 6.1.1
+RoxygenNote: 7.2.1
+Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2019-03-12 21:12:07 UTC; gagolews
+Packaged: 2023-01-09 07:28:38 UTC; gagolews
 License_is_FOSS: yes
 Repository: CRAN
-Date/Publication: 2019-03-12 23:20:03 UTC
-Built: R 3.6.0; x86_64-w64-mingw32; 2019-05-28 20:41:32 UTC; windows
-Archs: i386, x64
+Date/Publication: 2023-01-11 10:10:02 UTC
+Built: R 4.2.2; x86_64-w64-mingw32; 2023-01-12 00:52:15 UTC; windows
+ExperimentalWindowsRuntime: ucrt
+Archs: x64

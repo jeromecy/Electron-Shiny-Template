@@ -80,3 +80,88 @@ ctr128 <- aes$encrypt(plaintext)
 expect_true(identical(ctr128, ctr128output))
 aes <- AES(key, mode="CTR", IV=iv)
 expect_true(identical(plaintext, aes$decrypt(ctr128, raw=TRUE)))
+
+#cfb
+key <- hextextToRaw("2b7e151628aed2a6abf7158809cf4f3c")
+iv <- hextextToRaw("000102030405060708090a0b0c0d0e0f")
+#cfb not a multiplier of 16
+text <- "This is very secret string"
+key <- hextextToRaw("2b7e151628aed2a6abf7158809cf4f3c")
+iv <- hextextToRaw("000102030405060708090a0b0c0d0e0f")
+
+cfb128output <- hextextToRaw(paste("04960ebfb9044196ac6c4590bbdc8903",
+                                   "e1259a479e199af94518",sep=""))
+aes <- AES(key, mode="CFB", IV=iv)
+cfb128 <- aes$encrypt(text)
+expect_true(identical(cfb128, cfb128output))
+aes <- AES(key, mode="CFB", IV=iv)
+expect_true(identical(text, aes$decrypt(cfb128, raw=FALSE)))
+
+#cfb128
+cfb128output <- hextextToRaw(paste("3b3fd92eb72dad20333449f8e83cfb4a",
+                                   "c8a64537a0b3a93fcde3cdad9f1ce58b",
+                                   "26751f67a3cbb140b1808cf187a4f4df",
+                                   "c04b05357c5d1c0eeac4c66f9ff7f2e6",sep=""))
+aes <- AES(key, mode="CFB", IV=iv)
+cfb128 <- aes$encrypt(plaintext)
+expect_true(identical(cfb128, cfb128output))
+aes <- AES(key, mode="CFB", IV=iv)
+expect_true(identical(plaintext, aes$decrypt(cfb128, raw=TRUE)))
+
+# test throws exception on IV null or not a multiplier of 16 bytes
+aes <- AES(key, mode="CFB", IV=NULL)
+expect_error(aes$encrypt(plaintext))
+expect_error(aes$decrypt(plaintext))
+
+aes <- AES(key, mode="CFB", IV=raw(15))
+expect_error(aes$encrypt(plaintext))
+expect_error(aes$decrypt(plaintext))
+
+# test that providing raw vs character inputs results in the same output
+text <- "0123456789ABCDEF"
+raw_text <- charToRaw(text)
+expect_identical(
+  AES(key, mode="ECB")$encrypt(text),
+  AES(key, mode="ECB")$encrypt(raw_text)
+)
+
+# test padding for CBC
+expect_length(AES(raw_text, "CBC", raw_text)$encrypt(text), 16)
+expect_length(AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt(text), 32)
+expect_identical(
+  AES(raw_text, "CBC", raw_text)$encrypt(text),
+  head(AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt(text), 16)
+)
+expect_identical(
+  paste(AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt(text), collapse = ""),
+  "9d2cda901b682d3359709a5ab24196242125333bdf540132179ac0de79e1837a"
+)
+
+cipher <- AES(raw_text, "CBC", raw_text)$encrypt(text)
+expect_identical(AES(raw_text, "CBC", raw_text)$decrypt(cipher), text)
+cipher_padded <- AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt(text)
+expect_identical(AES(raw_text, "CBC", raw_text, padding = TRUE)$decrypt(cipher_padded), text)
+
+expect_error(AES(raw_text, "CBC", raw_text)$encrypt("testing"))
+expect_identical(
+  paste(AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt("testing"), collapse = ""),
+  "4017d340b6eafbb66c3dfceb10808cff"
+)
+expect_identical(
+  AES(raw_text, "CBC", raw_text, padding = TRUE)$decrypt(
+    AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt("testing")
+  ),
+  "testing"
+)
+
+expect_error(AES(raw_text, "CBC", raw_text)$encrypt("testingalongerstring"))
+expect_identical(
+  paste(AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt("testingalongerstring"), collapse = ""),
+  "2d870ada654f4bdff182497a88e08013a232bfb5701c12a4d3b29f4f66e74ecd"
+)
+expect_identical(
+  AES(raw_text, "CBC", raw_text, padding = TRUE)$decrypt(
+    AES(raw_text, "CBC", raw_text, padding = TRUE)$encrypt("testingalongerstring")
+  ),
+  "testingalongerstring"
+)

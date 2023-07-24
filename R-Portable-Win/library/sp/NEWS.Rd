@@ -1,5 +1,60 @@
 \name{NEWS} 
 \title{News for Package 'sp'}
+\section{Changes in version 2.0-0 (2023-06-20)}{
+\itemize{
+	\item \code{get_evolution_status()} defaults to 2, meaning sp will no longer call rgdal or rgeos; \code{spTransform} will work using \code{sf::st_transform}.
+	\item increase R version required from 3.0.0 to 3.2.0, which was de facto already required (PR from Sebastian Meyer)
+}
+}
+\section{Changes in version 1.6-1 (2023-05-31)}{
+\itemize{
+	\item add evolution vignette, drop over vignette, add startup message
+}
+}
+\section{Changes in version 1.6-0 (2023-01-19)}{
+\itemize{
+	\item add get_evolution_status() and set_evolution_status()
+}
+}
+\section{Changes in version 1.5-0 (2022-06-03)}{
+\itemize{
+	\item merge the evolution branch from rsbivand/sp@evolution
+}
+}
+\section{Changes in version 1.4-7 (2022-04-18)}{
+\itemize{
+	\item remove S-compatibility DOUBLE_* macros; https://github.com/edzer/sp/pull/115
+}
+}
+
+\section{Changes in version 1.4-6 (2021-11-14)}{
+\itemize{
+	\item add CRS cache and update CRS print method; https://github.com/edzer/sp/pull/103
+}
+}
+
+\section{Changes in version 1.4-2 (2020-05-20)}{
+\itemize{
+	\item Adding a wkt() method and muting internal warnings; https://github.com/edzer/sp/pull/76
+}
+}
+
+\section{Changes in version 1.4-1 (2020-02-29)}{
+\itemize{
+	\item warn on NULL projargs in CRS(); https://github.com/edzer/sp/pull/74
+}
+}
+\section{Changes in version 1.4-0 (2020-02-21)}{
+\itemize{
+	\item prepare for new (>= 1.5.1) rgdal, which creates and listens to a comments() field of a CRS object carrying a WKT representation of a CRS rather than the proj4string; @rsb, https://github.com/edzer/sp/pull/67 and https://github.com/edzer/sp/pull/69 ; for more info see e.g. https://github.com/edzer/sp/issues/68 and https://github.com/r-spatial/discuss/issues/28
+}
+}
+\section{Changes in version 1.3-2 (2019-11-07)}{
+\itemize{
+ \item fix length > 1 in coercion to logical error; #54, #60
+ \item add \code{is.na} method for \code{CRS} objects
+}
+}
 \section{Changes in version 1.2-5 (2017-06-16)}{
  \itemize{
   \item address error in spplot, leading to display of "Error using packet 1: mixture of missing and non missing values for cex"
@@ -17,7 +72,7 @@
   \itemize{
 	\item update sp gallery, see \url{https://edzer.github.io/sp/}
 	\item move \code{methods} from Imports: to Depends:
-    \item improve base plot methods for \code{SpatialGridDataFrame} and \code{SpatialPixelsDataFrame} objects, see \url{http://r-spatial.org/r/2016/03/08/plotting-spatial-grids.html} for examples
+    \item improve base plot methods for \code{SpatialGridDataFrame} and \code{SpatialPixelsDataFrame} objects, see \url{https://r-spatial.org/r/2016/03/08/plotting-spatial-grids.html} for examples
 	\item improve the graticule \code{labels} methods, see \code{?gridlines}
 	\item fix hole assignment for triangles, reported in \url{https://stat.ethz.ch/pipermail/r-sig-geo/2016-March/024214.html}
     \item \code{as.SpatialPolygons.GridTopology} drops rownames of coordinates generated, but keeps coordinate (column) names from the \code{cellcentre.offset} slot of the grid

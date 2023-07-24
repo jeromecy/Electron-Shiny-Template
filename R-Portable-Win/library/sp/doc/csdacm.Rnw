@@ -961,12 +961,13 @@ Let us first generate, as an example, a set of 100 conditional Gaussian
 simulations for the zinc variable in the meuse data set:
 \begin{footnotesize}
 <<eval=TRUE,echo=TRUE>>= 
-library(gstat)
 data(meuse)
 coordinates(meuse) <- ~x+y
-v <- vgm(.5, "Sph", 800, .05)
-sim <- krige(log(zinc)~1, meuse, meuse.grid, v, nsim=100, nmax=30)
-sim@data <- exp(sim@data)
+if (require(gstat, quietly = TRUE)) {
+ v <- vgm(.5, "Sph", 800, .05)
+ sim <- krige(log(zinc)~1, meuse, meuse.grid, v, nsim=100, nmax=30)
+ sim@data <- exp(sim@data)
+}
 @
 \end{footnotesize}
 
@@ -985,8 +986,10 @@ after which we can find the sample lower and upper 95\%
 confidence limits by
 \begin{footnotesize}
 << >>=
+if (require(gstat, quietly = TRUE)) {
 sim$lower <- quantile.Spatial(sim[1:100], probs = 0.025)
 sim$upper <- quantile.Spatial(sim[1:100], probs = 0.975)
+}
 @
 \end{footnotesize}
 
@@ -994,7 +997,9 @@ To get the sample distribution of the areal median, we can aggregate over
 layers:
 \begin{footnotesize}
 << >>=
+if (require(gstat, quietly = TRUE)) {
 medians <- quantile.Spatial(sim[1:100], probs = 0.5, byLayer = TRUE)
+}
 @
 <<eval=FALSE>>=
 hist(medians)
@@ -1025,9 +1030,11 @@ fractionBelow <- function(x, q, byLayer = FALSE) {
 options("width"=70)
 @
 << >>=
+if (require(gstat, quietly = TRUE)) {
 over500 <- 1 - fractionBelow(sim[1:100], 200, byLayer = TRUE)
 summary(over500)
 quantile(over500, c(0.025, 0.975))
+}
 @
 \end{footnotesize}
 
@@ -1043,9 +1050,15 @@ that exceed the memory capacity of the computers available.  A method for analys
 grids without fully loading them into memory then seems useful. Note that 
 package \pkg{rgdal} allows for partial reading of grids, e.g.,
 
+<<echo=FALSE,results=hide>>=
+run <- require(rgdal, quietly=TRUE)
+@
+
 \begin{footnotesize}
 <<>>=
-fn <- system.file("pictures/erdas_spnad83.tif", package = "rgdal")[1]
+if (run) {
+  fn <- system.file("pictures/erdas_spnad83.tif", package = "rgdal")[1]
+}
 @
 <<eval=FALSE>>=
 x <- readGDAL(fn, output.dim = c(120, 132))
@@ -1061,13 +1074,15 @@ Yet another approach is to use the low-level opening routines and then
 subset:
 
 \begin{footnotesize}
-<< >>= 
+<<>>= 
+if (run) {
 library(rgdal)
 x <- GDAL.open(fn)
 class(x)
 x.subs <- x[1:100, 1:100, 1]
 class(x.subs)
 gridparameters(x.subs)
+}
 @
 \end{footnotesize}
 An object of class \code{GDALReadOnlyDataset} only contains a file handle.
@@ -1088,12 +1103,14 @@ We will define two classes,
 <<echo=FALSE>>= 
 options("width"=50)
 @
-<< >>=
+<<>>=
+if (run) {
 setClass("SpatialGDAL",
     representation("Spatial", grid = "GridTopology", grod = "GDALReadOnlyDataset", 
 # NOT TOO WIDE
 		name = "character"))
 setClass("SpatialGDALWrite", "SpatialGDAL")
+}
 @
 <<echo=FALSE>>= 
 options("width"=70)

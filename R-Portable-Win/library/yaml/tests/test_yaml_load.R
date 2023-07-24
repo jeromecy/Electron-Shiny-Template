@@ -50,7 +50,7 @@ test_sequences_are_not_collapsed <- function() {
   checkEquals(list(1:2, 3L, 4:5), x)
 }
 
-test_named_maps_are_merged <- function() {
+test_named_maps_are_merged_without_warnings <- function() {
   x <- yaml.load("foo: bar\n<<: {baz: boo}", TRUE)
   checkEquals(2L, length(x))
   checkEquals("bar", x$foo)
@@ -61,12 +61,39 @@ test_named_maps_are_merged <- function() {
     x <- yaml.load("foo: bar\n<<: [{quux: quux}, {foo: doo}, {foo: junk}, {baz: blah}, {baz: boo}]", TRUE)
   })
   checkEquals(expected, x)
+  checkEquals(0L, length(warnings))
+
+  warnings <- captureWarnings({
+    x <- yaml.load("foo: bar\n<<: {foo: baz}\n<<: {foo: quux}")
+  })
+  checkEquals(1L, length(x))
+  checkEquals("bar", x$foo)
+  checkEquals(0L, length(warnings))
+
+  warnings <- captureWarnings({
+    x <- yaml.load("<<: {foo: bar}\nfoo: baz")
+  })
+  checkEquals(list(foo = 'bar'), x)
+  checkEquals(0L, length(warnings))
+}
+
+test_named_maps_are_merged_with_warnings <- function() {
+  x <- yaml.load("foo: bar\n<<: {baz: boo}", as.named.list = TRUE, merge.warning = TRUE)
+  checkEquals(2L, length(x))
+  checkEquals("bar", x$foo)
+  checkEquals("boo", x$baz)
+
+  expected <- list(foo = 'bar', quux = 'quux', baz = 'blah')
+  warnings <- captureWarnings({
+    x <- yaml.load("foo: bar\n<<: [{quux: quux}, {foo: doo}, {foo: junk}, {baz: blah}, {baz: boo}]", as.named.list = TRUE, merge.warning = TRUE)
+  })
+  checkEquals(expected, x)
   checkEquals(c("Duplicate map key ignored during merge: 'foo'",
                  "Duplicate map key ignored during merge: 'foo'",
                  "Duplicate map key ignored during merge: 'baz'"), warnings)
 
   warnings <- captureWarnings({
-    x <- yaml.load("foo: bar\n<<: {foo: baz}\n<<: {foo: quux}")
+    x <- yaml.load("foo: bar\n<<: {foo: baz}\n<<: {foo: quux}", as.named.list = TRUE, merge.warning = TRUE)
   })
   checkEquals(1L, length(x))
   checkEquals("bar", x$foo)
@@ -74,21 +101,50 @@ test_named_maps_are_merged <- function() {
                  "Duplicate map key ignored during merge: 'foo'"), warnings)
 
   warnings <- captureWarnings({
-    x <- yaml.load("<<: {foo: bar}\nfoo: baz")
+    x <- yaml.load("<<: {foo: bar}\nfoo: baz", as.named.list = TRUE, merge.warning = TRUE)
   })
   checkEquals(list(foo = 'bar'), x)
-  checkEquals(0, length(warnings))
+  checkEquals(c("Duplicate map key ignored after merge: 'foo'"), warnings)
 }
 
-test_unnamed_maps_are_merged <- function() {
-  x <- yaml.load("foo: bar\n<<: {baz: boo}", FALSE)
+test_unnamed_maps_are_merged_without_warnings <- function() {
+  x <- yaml.load("foo: bar\n<<: {baz: boo}", as.named.list = FALSE)
   checkEquals(2L, length(x))
   checkEquals(list("foo", "baz"), attr(x, 'keys'))
   checkEquals("bar", x[[1]])
   checkEquals("boo", x[[2]])
 
   warnings <- captureWarnings({
-    x <- yaml.load("foo: bar\n<<: [{quux: quux}, {foo: doo}, {baz: boo}]", FALSE)
+    x <- yaml.load("foo: bar\n<<: [{quux: quux}, {foo: doo}, {baz: boo}]", as.named.list = FALSE)
+  })
+  checkEquals(3L, length(x))
+  checkEquals(list("foo", "quux", "baz"), attr(x, 'keys'))
+  checkEquals("bar", x[[1]])
+  checkEquals("quux", x[[2]])
+  checkEquals("boo", x[[3]])
+  checkEquals(0L, length(warnings))
+
+  warnings <- captureWarnings({
+    x <- yaml.load("<<: {foo: bar}\nfoo: baz", as.named.list = FALSE)
+  })
+  checkEquals(1L, length(x))
+  checkEquals(list("foo"), attr(x, 'keys'))
+  checkEquals("bar", x[[1]])
+  checkEquals(0L, length(warnings))
+}
+
+test_unnamed_maps_are_merged_with_warnings <- function() {
+  warnings <- captureWarnings({
+    x <- yaml.load("foo: bar\n<<: {baz: boo}", as.named.list = FALSE, merge.warning = TRUE)
+  })
+  checkEquals(2L, length(x))
+  checkEquals(list("foo", "baz"), attr(x, 'keys'))
+  checkEquals("bar", x[[1]])
+  checkEquals("boo", x[[2]])
+  checkEquals(0L, length(warnings))
+
+  warnings <- captureWarnings({
+    x <- yaml.load("foo: bar\n<<: [{quux: quux}, {foo: doo}, {baz: boo}]", as.named.list = FALSE, merge.warning = TRUE)
   })
   checkEquals(3L, length(x))
   checkEquals(list("foo", "quux", "baz"), attr(x, 'keys'))
@@ -98,12 +154,12 @@ test_unnamed_maps_are_merged <- function() {
   checkEquals("Duplicate map key ignored during merge: 'foo'", warnings)
 
   warnings <- captureWarnings({
-    x <- yaml.load("<<: {foo: bar}\nfoo: baz", FALSE)
+    x <- yaml.load("<<: {foo: bar}\nfoo: baz", as.named.list = FALSE, merge.warning = TRUE)
   })
   checkEquals(1L, length(x))
   checkEquals(list("foo"), attr(x, 'keys'))
   checkEquals("bar", x[[1]])
-  checkEquals(0, length(warnings))
+  checkEquals(c("Duplicate map key ignored after merge: 'foo'"), warnings)
 }
 
 test_duplicate_keys_throws_an_error <- function() {
@@ -400,13 +456,14 @@ test_invalid_omap_causes_error <- function() {
   checkException(yaml.load("--- !omap\n- sup?"))
 }
 
-test_expressions_are_implicitly_converted_with_warning <- function() {
+test_expressions_are_not_implicitly_converted_with_warning <- function() {
   warnings <- captureWarnings({
     x <- yaml.load("!expr |\n  function() \n  {\n    'hey!'\n  }")
   })
-  checkEquals("function", class(x))
-  checkEquals("hey!", x())
-  checkEquals("Evaluating R expressions (!expr) will soon require explicit `eval.expr` option (see yaml.load help)", warnings)
+  checkEquals("function() \n{\n  'hey!'\n}", x)
+#  checkEquals("function", class(x))
+#  checkEquals("hey!", x())
+  checkEquals("Evaluating R expressions (!expr) requires explicit `eval.expr=TRUE` option (see yaml.load help)", warnings)
 }
 
 test_expressions_are_explicitly_converted_without_warning <- function() {
@@ -424,7 +481,7 @@ test_expressions_are_explicitly_not_converted <- function() {
 }
 
 test_invalid_expressions_cause_error <- function() {
-  checkException(yaml.load("!expr |\n  1+"))
+  checkException(yaml.load("!expr |\n  1+", eval.expr=TRUE))
 }
 
 # NOTE: this works, but R_tryEval doesn't return when called non-interactively
@@ -563,4 +620,51 @@ test_numeric_overflow_creates_a_warning <- function() {
 test_list_of_one_list_is_loaded_properly <- function() {
   result <- yaml.load('a:\n -\n  - b\n  - c\n')
   checkEquals(list(a = list(c("b", "c"))), result)
+}
+
+test_override_merge_precedence <- function() {
+  doc <- "[ &one { foo: bar }, { <<: *one, foo: baz } ]"
+  expected <- list(list(foo = 'bar'), list(foo = 'baz'))
+  result <- yaml.load(doc, merge.precedence = "override")
+  checkEquals(expected, result)
+}
+
+test_explicit_bool_tag_for_true_value <- function() {
+  doc <- "!!bool 'true'"
+  expected <- TRUE
+  result <- yaml.load(doc)
+  checkEquals(expected, result)
+}
+
+test_explicit_bool_tag_for_false_value <- function() {
+  doc <- "!!bool 'false'"
+  expected <- FALSE
+  result <- yaml.load(doc)
+  checkEquals(expected, result)
+}
+
+test_explicit_bool_tag_for_na_value <- function() {
+  doc <- "!!bool '.na'"
+  expected <- NA
+  result <- yaml.load(doc)
+  checkEquals(expected, result)
+}
+
+test_explicit_bool_tag_for_invalid_value <- function() {
+  doc <- "!!bool foo"
+  expected <- NA
+  warnings <- captureWarnings({
+    result <- yaml.load(doc)
+  })
+  checkEquals(expected, result)
+  checkEquals(c("NAs introduced by coercion: foo is not a recognized boolean value"), warnings)
+}
+
+test_builtin_as_handler_works <- function() {
+  x <- "{a: 1, b: 2, c: 3}"
+  warnings <- captureWarnings({
+    results <- yaml.load(x, handlers=list(int=as.double))
+  })
+  checkEquals(class(results$a), "numeric")
+  checkEquals(0, length(warnings))
 }

@@ -1,24 +1,19 @@
 #include "yaml.h"
 
-char *
-Ryaml_find_implicit_tag(str, len)
-  const char *str;
-  size_t len;
+char *Ryaml_find_implicit_tag(const char *str, size_t len)
 {
   /* This bit was taken from implicit.re, which is in the Syck library.
    *
    * Copyright (C) 2003 why the lucky stiff */
 
-  const char *cursor, *limit, *marker;
+  const char *cursor, *marker;
   cursor = str;
-  limit = str + len;
 
 /*!re2c
 
 re2c:define:YYCTYPE  = "char";
 re2c:define:YYCURSOR = cursor;
 re2c:define:YYMARKER = marker;
-re2c:define:YYLIMIT  = limit;
 re2c:yyfill:enable   = 0;
 
 NULL = [\000] ;

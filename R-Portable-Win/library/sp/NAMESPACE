@@ -59,6 +59,8 @@ export(
 	set_PolypathRule,
 	set_col_regions,
 	get_col_regions,
+	set_evolution_status,
+	get_evolution_status,
 
 	coordinatevalues,
 
@@ -260,6 +262,7 @@ exportMethods(
 	"polygons<-",
 	proj4string,
 	"proj4string<-",
+        wkt,
 	recenter,
 	show, 
 	spChFIDs,
@@ -270,7 +273,12 @@ exportMethods(
 	spsample,
 	summary,
 	surfaceArea, 
-	spTransform
+	spTransform,
+        rebuild_CRS
+)
+
+exportMethods(
+ elide # usmap https://github.com/pdil/usmap/issues/57
 )
 
 S3method(as.array, SpatialGridDataFrame)
@@ -315,6 +323,8 @@ S3method(head, Spatial)
 S3method(image, SpatialPixelsDataFrame)
 S3method(image, SpatialPixels)
 S3method(image, SpatialGridDataFrame)
+
+S3method(is.na, CRS)
 
 S3method(labels, SpatialLines)
 

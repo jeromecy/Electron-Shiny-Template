@@ -1,25 +1,25 @@
 JS                      Objects imported from other packages
 addAwesomeMarkers       Add Awesome Markers
 addControl              Graphics elements and layers
-addGraticule            Add a Graticule on the map see <URL:
-                        https://github.com/turban/Leaflet.Graticule>
+addGraticule            Add a Graticule on the map see
+                        <https://github.com/turban/Leaflet.Graticule>
 addLayersControl        Add UI controls to switch layers on and off
 addLegend               Add a color legend to a map
 addMapPane              Add additional panes to leaflet map to control
                         layer order
 addMeasure              Add a measure control to the map.
-addMiniMap              Add a minimap to the Map <URL:
-                        https://github.com/Norkart/Leaflet-MiniMap>
+addMiniMap              Add a minimap to the Map
+                        <https://github.com/Norkart/Leaflet-MiniMap>
 addProviderTiles        Add a tile layer from a known map provider
 addRasterImage          Add a raster image as a layer
 addScaleBar             Add or remove a scale bar
-addSimpleGraticule      Add a simple Graticule on the map see <URL:
-                        https://github.com/ablakey/Leaflet.SimpleGraticule>
+addSimpleGraticule      Add a simple Graticule on the map see
+                        <https://github.com/ablakey/Leaflet.SimpleGraticule>
 addTerminator           Add a daylight layer on top of the map
 atlStorms2005           Atlantic Ocean storms 2005
 awesomeIconList         Make awesome-icon set
-awesomeIcons            Create a list of awesome icon data see <URL:
-                        https://github.com/lvoogdt/Leaflet.awesome-markers>
+awesomeIcons            Create a list of awesome icon data see
+                        <https://github.com/lennardv2/Leaflet.awesome-markers>
 breweries91             Selected breweries in Franconia
 colorNumeric            Color mapping
 createLeafletMap        Legacy functions
@@ -62,7 +62,6 @@ makeIcon                Define icon sets
 mapOptions              Set options on a leaflet map object
 previewColors           Color previewing utility
 providers               Providers
-providers.details       Providers Details
 removeControl           Remove elements from a map
 setView                 Methods to manipulate the map widget
 showGroup               Show or hide layer groups

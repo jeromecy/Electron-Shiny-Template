@@ -32,7 +32,7 @@ test_reading_a_complicated_document_works <- function() {
   checkEquals(expected, x)
 }
 
-test_expressions_are_implicitly_converted_with_warning <- function() {
+test_expressions_are_not_implicitly_converted_with_warning <- function() {
   warnings <- captureWarnings({
     filename <- tempfile()
     cat("!expr 123 + 456", file=filename, sep="\n")
@@ -41,9 +41,9 @@ test_expressions_are_implicitly_converted_with_warning <- function() {
     close(foo)
     unlink(filename)
   })
-  checkEquals("numeric", class(x))
-  checkEquals(579, x)
-  checkEquals("Evaluating R expressions (!expr) will soon require explicit `eval.expr` option (see yaml.load help)", warnings)
+  checkEquals("character", class(x))
+  checkEquals("123 + 456", x)
+  checkEquals("Evaluating R expressions (!expr) requires explicit `eval.expr=TRUE` option (see yaml.load help)", warnings)
 }
 
 test_expressions_are_explicitly_converted_without_warning <- function() {
@@ -70,4 +70,14 @@ test_expressions_are_unconverted <- function() {
 
   checkEquals("character", class(x))
   checkEquals("123 + 456", x)
+}
+
+test_merge_specification_example_with_merge_override <- function() {
+  filename <- system.file(file.path("tests", "files", "merge.yml"), package = "yaml")
+  x <- yaml.load_file(filename, merge.precedence = "override")
+  expected <- list(x = 1, y = 2, r = 10, label = "center/big")
+  checkNamedListEquals(expected, x[[5]])
+  checkNamedListEquals(expected, x[[6]])
+  checkNamedListEquals(expected, x[[7]])
+  checkNamedListEquals(expected, x[[8]])
 }
